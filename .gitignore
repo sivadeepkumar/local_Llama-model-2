@@ -1,3 +1,6 @@
 /ll_env
 
 /models
+
+export TOKENIZERS_PARALLELISM=false
+# 
