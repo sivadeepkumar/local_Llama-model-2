@@ -1,12 +1,12 @@
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
-from flask_cors import CORS 
+# from flask_cors import CORS 
 import os
 import logging
 import torch
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
 query_engine = ''
 
 load_dotenv()
@@ -21,6 +21,7 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 from llama_index.core import VectorStoreIndex,SimpleDirectoryReader,ServiceContext
 from llama_index.llms.huggingface import HuggingFaceLLM
+
 documents = SimpleDirectoryReader("data").load_data()
 
 # print(documents)
@@ -137,4 +138,3 @@ def query():
 
 if __name__ == '__main__':
     app.run(debug=True)
-

@@ -1,58 +1,35 @@
 from flask import Flask, request, jsonify
 from langchain.prompts import PromptTemplate
 from langchain_community.llms import CTransformers
-from llama_index.core import VectorStoreIndex,Settings,SimpleDirectoryReader, ServiceContext
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, ServiceContext,Settings
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 
 # Local settings
 from llama_index.core.node_parser import SentenceSplitter
-import chromadb
-from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.core import StorageContext
-from chromadb.db.base import UniqueConstraintError
-from chromadb.documents import Document, VectorType
-# from chromadb import Document
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
 # from flask_cors import CORS 
 # CORS(app)
+
+
 app = Flask(__name__)
 
-
-chroma_client = chromadb.PersistentClient()
-
-try:
-    chroma_collection = chroma_client.create_collection("quickstart")
-except UniqueConstraintError:
-    # Handle case where collection already exists
-    print("Collection there ******************************")
-    chroma_collection = chroma_client.get_collection("quickstart")
-    
-
-vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
-storage_context = StorageContext.from_defaults(vector_store=vector_store)
+GRADIENT_ACCESS_TOKEN = os.getenv("GRADIENT_ACCESS_TOKEN")
+GRADIENT_WORKSPACE_ID = os.getenv("GRADIENT_WORKSPACE_ID")
 
 
 # Load documents
-# documents = SimpleDirectoryReader("data").load_data()
+documents = SimpleDirectoryReader("data").load_data()
 
 
-# Load documents
-documents = Document.bulk_from_directory("data")  # Assuming data directory contains your documents
+from llama_index.embeddings.gradient import GradientEmbedding
 
-# Insert documents into the vector database
-for doc in documents:
-    chroma_collection.insert(doc)
-
-
-# #   huggingface-cli login
-# >
-# Initialize HuggingFace Embeddings
-# embed_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
-
-# >
-from sentence_transformers import SentenceTransformer
-embed_model = SentenceTransformer('./models/stsb-distilbert-base')  #  ./stsb-distilbert-base')
-
+embed_model = GradientEmbedding(
+    gradient_access_token=GRADIENT_ACCESS_TOKEN,
+    gradient_workspace_id=GRADIENT_WORKSPACE_ID,
+    gradient_model_slug="bge-large",
+)
 
 
 # Initialize LLama2 model
@@ -63,7 +40,7 @@ llm = CTransformers(model='models/llama-2-7b-chat.ggmlv3.q8_0.bin',
 
 
 # Instantiate Settings
-Settings.chunk_size = 120
+Settings.chunk_size = 100
 Settings.llm = llm
 Settings.embed_model = embed_model
 
@@ -71,9 +48,10 @@ Settings.embed_model = embed_model
 
 
 print("*********************************************")  # This line is for just to find train is over
-
-index = VectorStoreIndex(storage_context=storage_context)
-
+# Initialize VectorStoreIndex with LLama2 and HuggingFace Embeddings
+# index = VectorStoreIndex.from_documents(documents)
+index = VectorStoreIndex.from_documents(documents=documents   # storage_context=storage_context,
+)
 print("*********************************************")  # This line is for just to find train is over
 
 print(index)
@@ -109,4 +87,22 @@ def generate_response():
     return jsonify({'response': response})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0', port=8000)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

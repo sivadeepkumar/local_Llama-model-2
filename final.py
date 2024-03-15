@@ -44,12 +44,21 @@ query_engine = index.as_query_engine()
 
 def getLLamaresponse(input_text):
     # Prompt Template
-    template = """
-        Provide me the response for the topic: {input_text}.
-            """
-    prompt = PromptTemplate(input_variables=["input_text"], template=template)
+
+    context = """
+    Artifical Intelligence or Big Data
+    """
+    
+    template = f"""
+    Given the following context,
+    context: {context}
+    {input_text}
+    """
+
+    
+    # prompt = PromptTemplate(input_variables=["input_text"], template=template)
     # response = llm.generate(prompt(input_text))
-    response = query_engine.query(input_text)
+    response = query_engine.query(template)
     print(type(response))
     print(dir(response))   # ['data', 'response', 'user_query']
 

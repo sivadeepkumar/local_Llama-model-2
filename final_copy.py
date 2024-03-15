@@ -44,10 +44,10 @@ query_engine = index.as_query_engine()
 
 def getLLamaresponse(input_text):
     # Prompt Template
-    template = """
-        Provide me the response for the topic: {input_text}.
-            """
-    prompt = PromptTemplate(input_variables=["input_text"], template=template)
+    # template = """
+    #     Provide me the response for the topic: {input_text}.
+    #         """
+    # prompt = PromptTemplate(input_variables=["input_text"], template=template)
     # response = llm.generate(prompt(input_text))
     response = query_engine.query(input_text)
     print(type(response))
@@ -71,6 +71,5 @@ def generate_response():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
 
 

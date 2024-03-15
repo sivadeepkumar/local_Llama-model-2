@@ -2,5 +2,5 @@
 
 /models
 
-export TOKENIZERS_PARALLELISM=false
-# 
+/.env 
+# export TOKENIZERS_PARALLELISM=false
